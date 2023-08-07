@@ -1,5 +1,6 @@
 #!/bin/bash
 
+tc=0
 # Check if the script is run with two valid folder names as arguments
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <path_to_folder1> <path_to_folder2>"
@@ -83,12 +84,14 @@ compare_files() {
         added_lines_count=$(echo "$added_lines" | wc -l)
         removed_lines_count=$(echo "$removed_lines" | wc -l)
         # echo "$added_lines_count $removed_lines_count"
-        total_change=$((total_change+added_lines_count+removed_lines_count))
+        total_change=$(($added_lines_count+$removed_lines_count))
+        tc=$(($tc + $total_change))
         echo "added: $added_lines_count, removed: $removed_lines_count, total: $total_change"
       fi
     else
       echo "File $relative_path is deleted from the first folder."
       new_change=$(countLines "$file1_path")
+      tc=$(($tc + $new_change))
       echo "total deleted lines $new_change"
     fi
   done
@@ -104,6 +107,7 @@ compare_files() {
       if is_csharp_file "$file2_path"; then
         echo "File $relative_path is created in the second folder."
         new_change=$(countLines "$file2_path")
+        tc=$(($tc + $new_change))
         echo "total added lines $new_change"
       fi
     fi
@@ -111,3 +115,4 @@ compare_files() {
 }
 # Call the function to compare files in both folders
 compare_files "$folder1" "$folder2"
+echo "Total changes: $tc"
